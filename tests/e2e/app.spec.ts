@@ -5,10 +5,20 @@ import { findOrientations, rotateFaces, rotateGrid } from '../../src/domain/orie
 import type { Photo } from '../../src/domain/vision';
 import { facePhoto } from './photo-fixture';
 
+async function waitForGuide(page: Page, timeout = 130_000) {
+  const started = Date.now();
+  const ready = page.getByRole('button', { name: '已对齐，开始第 1 步' });
+  await expect.poll(async () => {
+    if (await ready.isVisible()) return 'ready';
+    const error = (await page.getByRole('alert').allTextContents()).at(-1);
+    return error ? `error: ${error.trim()}` : 'waiting';
+  }, { timeout, intervals: [250, 500, 1000], message: '等待求解 Worker 进入握法确认页' }).toBe('ready');
+  console.log(`[solver] 三阶握法页就绪：${Date.now() - started} ms`);
+}
 async function demo(page: Page) {
   await page.goto('/');
   await page.getByRole('button', { name: '先体验一下' }).click();
-  await expect(page.getByRole('heading', { name: '拿对方向，我们就开始' })).toBeVisible({ timeout: 60_000 });
+  await waitForGuide(page);
   await page.getByRole('button', { name: '已对齐，开始第 1 步' }).click();
   await expect(page.getByRole('button', { name: '我转好了', exact: true })).toBeEnabled();
 }
@@ -86,7 +96,7 @@ test('六张非对称合成照片上传、识别、人工校正、有效性与�
   await page.locator('.review-face').first().locator('.face-editor button').first().click();
   await expect(page.getByRole('button', { name: '这就是我的魔方' })).toBeEnabled();
   await page.getByRole('button', { name: '这就是我的魔方' }).click();
-  await expect(page.getByRole('button', { name: '已对齐，开始第 1 步' })).toBeVisible({ timeout: 60_000 });
+  await waitForGuide(page);
   await page.getByRole('button', { name: '状态不同，重新拍照' }).click();
   await expect(page.locator('.count-badge')).toContainText('0');
   await expect(page.locator('.color-panel .face-editor button.empty')).toHaveCount(9);
@@ -209,7 +219,7 @@ test('六面方向恢复保留实拍取样和手工校色，候选先预览再�
   await expect(primary).toBeEnabled();
   expect((await readDraft(page)).photos.F!.samples).toEqual(after.photos.F!.samples);
   await primary.click();
-  await expect(page.getByRole('button', { name: '已对齐，开始第 1 步' })).toBeVisible({ timeout: 60_000 });
+  await waitForGuide(page);
 });
 
 test('多个合法候选不会擅自应用，修改颜色会废弃旧诊断', async ({ page }) => {

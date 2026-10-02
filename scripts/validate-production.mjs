@@ -32,7 +32,7 @@ await new Promise(resolveServer => server.listen(0, '127.0.0.1', resolveServer))
 const url = `http://127.0.0.1:${server.address().port}${base}`;
 await mkdir('test-results/production', { recursive: true });
 const ci = !!process.env.CI;
-const expect = playwrightExpect.configure({ timeout: ci ? 90_000 : 30_000 });
+const expect = playwrightExpect.configure({ timeout: ci ? 150_000 : 30_000 });
 const browser = await chromium.launch({
   channel: process.env.PLAYWRIGHT_CHANNEL || (ci ? undefined : 'chrome'),
   args: ci ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : [],

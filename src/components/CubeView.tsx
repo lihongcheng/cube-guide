@@ -129,7 +129,8 @@ export default function CubeView({ state, scheme = DEFAULT_SCHEME, move, playId 
     view={view} reset={reset} interactive={interactive} onEnd={onEnd} />;
   return <div className={`cube-view ${compact ? 'compact' : ''}`}>
     {webgl ? <CanvasBoundary fallback={fallback}><Suspense fallback={<div className="loading-cube">正在准备魔方…</div>}>
-      <Canvas shadows dpr={[1, 2]} camera={{ fov: 30, position: [6.8, 5.4, 8.5] }} gl={{ antialias: true, alpha: true }}
+      <Canvas shadows dpr={[1, 2]} frameloop={interactive || move ? 'always' : 'demand'}
+        camera={{ fov: 30, position: [6.8, 5.4, 8.5] }} gl={{ antialias: true, alpha: true }}
         fallback={fallback}>
         <ambientLight intensity={1.6} />
         <directionalLight position={[5, 8, 6]} intensity={2.5} castShadow shadow-mapSize={[1024, 1024]} />

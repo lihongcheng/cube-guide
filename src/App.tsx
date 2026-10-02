@@ -227,7 +227,7 @@ function CubeApp({ size, onSize }: { size: CubeSize; onSize: (size: CubeSize) =>
       };
       worker.current.onerror = () => { cancelSolve(); setError('还原引擎加载失败，请检查网络后重试。'); };
       worker.current.postMessage({ id, state });
-      const timeout = size === 4 ? 180 : 60;
+      const timeout = size === 4 ? 180 : 120;
       timer.current = setTimeout(() => { cancelSolve(); setError(`这次计算超过 ${timeout} 秒，请重试；照片和颜色已保留。`); }, timeout * 1000);
     } catch { cancelSolve(); setError('当前浏览器无法启动还原引擎，请使用新版 Chrome 或 Safari。'); }
   }
