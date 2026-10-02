@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.dbg/
+debug-cube-review-blocked.md
+test-results/
+playwright-report/
+*.tsbuildinfo
+.DS_Store
+.env.local

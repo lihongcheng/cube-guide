@@ -1,0 +1,63 @@
+name: Validate and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:pages
+      - run: npx playwright install --with-deps chromium
+      - name: Run browser regression
+        run: CI=true npm run test:e2e
+      - name: Verify the static Pages subpath and solver Worker
+        run: CI=true npm run test:production
+      - uses: actions/upload-artifact@v7.0.1
+        if: always()
+        with:
+          name: browser-validation
+          path: |
+            playwright-report/
+            test-results/
+      - uses: actions/upload-pages-artifact@v5.0.0
+        if: github.event_name != 'pull_request'
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # First enable Settings -> Pages -> Source: GitHub Actions in the repository.
+      - uses: actions/configure-pages@v6.0.0
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5.0.1
