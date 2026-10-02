@@ -15,12 +15,15 @@ async function waitForGuide(page: Page, timeout = 130_000) {
   }, { timeout, intervals: [250, 500, 1000], message: '等待求解 Worker 进入握法确认页' }).toBe('ready');
   console.log(`[solver] 三阶握法页就绪：${Date.now() - started} ms`);
 }
-async function demo(page: Page) {
-  await page.goto('/');
+async function startDemo(page: Page) {
   await page.getByRole('button', { name: '先体验一下' }).click();
   await waitForGuide(page);
   await page.getByRole('button', { name: '已对齐，开始第 1 步' }).click();
   await expect(page.getByRole('button', { name: '我转好了', exact: true })).toBeEnabled();
+}
+async function demo(page: Page) {
+  await page.goto('/');
+  await startDemo(page);
 }
 async function confirm(page: Page) {
   const button = page.getByRole('button', { name: '我转好了', exact: true });
@@ -33,7 +36,7 @@ test('真实 Worker 求解、3D 播放、重播不推进、完整通关', async 
   await page.goto('/');
   await expect(page.getByRole('button', { name: '还原我的魔方', exact: true })).toBeEnabled();
   await page.screenshot({ path: 'test-results/home-desktop.png', fullPage: true });
-  await demo(page);
+  await startDemo(page);
   await expect(page.locator('.progress-panel b')).toContainText('0 /');
   await page.getByRole('button', { name: '再看一次', exact: true }).click();
   await expect(page.getByRole('button', { name: '我转好了', exact: true })).toBeEnabled();

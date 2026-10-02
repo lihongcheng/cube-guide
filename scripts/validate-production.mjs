@@ -35,7 +35,7 @@ const ci = !!process.env.CI;
 const expect = playwrightExpect.configure({ timeout: ci ? 150_000 : 30_000 });
 const browser = await chromium.launch({
   channel: process.env.PLAYWRIGHT_CHANNEL || (ci ? undefined : 'chrome'),
-  args: ci ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : [],
+  args: ci ? ['--disable-gpu', '--disable-software-rasterizer'] : [],
 });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1050 } });
 const errors = [];
