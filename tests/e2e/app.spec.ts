@@ -35,7 +35,7 @@ test('真实 Worker 求解、3D 播放、重播不推进、完整通关', async 
   page.on('pageerror', e => errors.push(e.message));
   await page.goto('/');
   await expect(page.getByRole('button', { name: '还原我的魔方', exact: true })).toBeEnabled();
-  await page.screenshot({ path: 'test-results/home-desktop.png', fullPage: true });
+  if (!process.env.CI) await page.screenshot({ path: 'test-results/home-desktop.png', fullPage: true });
   await startDemo(page);
   await expect(page.locator('.progress-panel b')).toContainText('0 /');
   await page.getByRole('button', { name: '再看一次', exact: true }).click();

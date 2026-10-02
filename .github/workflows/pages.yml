@@ -26,10 +26,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: npm run build:pages
       - run: npx playwright install --with-deps chromium
       - name: Run browser regression
         run: CI=true npm run test:e2e
+      - run: npm run build:pages
       - name: Verify the static Pages subpath and solver Worker
         run: CI=true npm run test:production
       - uses: actions/upload-artifact@v7.0.1
